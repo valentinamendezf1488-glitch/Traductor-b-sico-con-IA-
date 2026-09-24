@@ -1,12 +1,16 @@
 import streamlit as st
 import urllib.request
 import json
+import urllib.parse
 
+# Configuración visual de la App
 st.set_page_config(page_title="Mi Traductor IA", page_icon="🤖")
 st.title("Mi Traductor con IA Inteligente 🤖 Daniela App")
 
-texto_usuario = st.text_area("Escribe aquí tu texto en español:", value="Hola mi nombre es Daniela")
+# Cuadro para escribir
+texto_usuario = st.text_area("Escribe aquí tu texto en español:", value="Hola mi cancion favorita es lola la vaca")
 
+# Selector de idioma
 idioma_seleccionado = st.selectbox(
     "Selecciona el idioma al que deseas traducir:",
     ["Inglés", "Francés", "Italiano", "Alemán"]
@@ -14,18 +18,26 @@ idioma_seleccionado = st.selectbox(
 
 codigos_idiomas = {"Inglés": "en", "Francés": "fr", "Italiano": "it", "Alemán": "de"}
 
+# Botón para traducir
 if st.button("Traducir Ahora ✨", type="primary"):
     if texto_usuario:
         try:
             codigo_destino = codigos_idiomas[idioma_seleccionado]
-            url = f"https://googleapis.com{codigo_destino}&dt=t&q={urllib.parse.quote(texto_usuario)}"
+            
+            # Corrección definitiva: Codificamos el texto correctamente para internet
+            texto_codificado = urllib.parse.quote(texto_usuario)
+            url = f"https://googleapis.com{codigo_destino}&dt=t&q={texto_codificado}"
+            
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             
             with urllib.request.urlopen(req) as response:
                 datos = json.loads(response.read().decode())
-                resultado = datos[0][0][0] # Filtra el texto limpio de la traducción
+                # Extraemos el texto limpio traducido
+                resultado = datos[0][0][0]
                 
                 st.success("¡Traducción exitosa!")
+                st.subheader("Resultado:")
                 st.info(resultado)
         except Exception as e:
             st.error(f"Error al conectar: {e}")
+
