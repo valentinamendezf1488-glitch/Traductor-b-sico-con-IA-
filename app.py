@@ -1,69 +1,56 @@
 import streamlit as st
+import urllib.request
+import json
+import urllib.parse
 
-# Configuración visual de la App
+# Configuración visual de tu aplicación web
 st.set_page_config(page_title="Mi Traductor IA", page_icon="🤖")
 st.title("Mi Traductor con IA Inteligente 🤖 Daniela App")
 
-# Cuadro para escribir
-texto_usuario = st.text_area("Escribe aquí tu texto en español:", value="Hola mi nombre es Cristian")
+# Cuadro de texto interactivo
+texto_usuario = st.text_area("Escribe aquí tu texto en español:", value="Hola mi nombre es Cristian, me gusta el helado de chocolate")
 
-# Selector con los 5 idiomas
+# Selector con los 5 idiomas que pediste
 idioma_seleccionado = st.selectbox(
     "Selecciona el idioma al que deseas traducir:",
-    ["Inglés", "Francés", "Italiano", "Alemán", "Portugués", "Japonés"]
+    ["Inglés", "Francés", "Italiano", "Alemán", "Portugués"]
 )
 
-# Base de datos ampliada a 5 idiomas
-traducciones = {
-    "Hola mi nombre es Daniela": {
-        "Inglés": "Hello, my name is Daniela",
-        "Francés": "Bonjour, je m'appelle Daniela",
-        "Italiano": "Ciao, mi chiamo Daniela",
-        "Alemán": "Hallo, mein Name ist Daniela",
-        "Portugués": "Olá, meu nome é Daniela",
-        "Japonés": "こんにちは、私の名前はダニエラです (Konnichiwa, watashi no namae wa Daniela desu)"
-    },
-    "Hola mi nombre es Cristian": {
-        "Inglés": "Hello, my name is Cristian",
-        "Francés": "Bonjour, je m'appelle Cristian",
-        "Italiano": "Ciao, mi chiamo Cristian",
-        "Alemán": "Hallo, mein Name ist Cristian",
-        "Portugués": "Olá, meu nome é Cristian",
-        "Japonés": "こんにちは、私の名前はクリスティアンです (Konnichiwa, watashi no namae wa Cristian desu)"
-    },
-    "Hola mi cancion favorita es lola la vaca": {
-        "Inglés": "Hello, my favorite song is Lola the cow",
-        "Francés": "Bonjour, ma chanson préférée est Lola la vache",
-        "Italiano": "Ciao, la mia canzone preferita è Lola la mucca",
-        "Alemán": "Hallo, mein Lieblingslied ist Lola die Kuh",
-        "Portugués": "Olá, minha música favorita é Lola a vaca",
-        "Japonés": "こんにちは、私の好きな歌はロラ・ラ・バカです (Konnichiwa, watashi no sukinauta wa Rora Ra Baka desu)"
-    }
+# Diccionario de códigos oficiales para la IA
+codigos_idiomas = {
+    "Inglés": "en",
+    "Francés": "fr",
+    "Italiano": "it",
+    "Alemán": "de",
+    "Portugués": "pt"
 }
 
-# Botón para traducir
+# Botón interactivo para ejecutar la traducción
 if st.button("Traducir Ahora ✨", type="primary"):
     if texto_usuario:
-        texto_limpio = texto_usuario.strip()
-        
-        if texto_limpio in traducciones:
-            resultado = traducciones[texto_limpio][idioma_seleccionado]
-            st.success("¡Traducción exitosa!")
-            st.info(resultado)
-        else:
-            # Respuesta inteligente de respaldo si escriben otra frase
-            respuestas_respaldo = {
-                "Inglés": f"Hello! Your text is: '{texto_limpio}'",
-                "Francés": f"Bonjour! Votre texte est: '{texto_limpio}'",
-                "Italiano": f"Ciao! Il tuo testo è: '{texto_limpio}'",
-                "Alemán": f"Hallo! Ihr Text ist: '{texto_limpio}'",
-                "Portugués": f"Olá! Seu texto é: '{texto_limpio}'",
-                "Japonés": f"こんにちは！あなたのテキストは: '{texto_limpio}'"
-            }
-            resultado = respuestas_respaldo[idioma_seleccionado]
-            st.success("¡Traducción exitosa!")
-            st.info(resultado)
+        try:
+            # 1. Obtenemos el código secreto del idioma (ej: 'en')
+            codigo_destino = codigos_idiomas[idioma_seleccionado]
+            
+            # 2. Limpiamos y preparamos el texto para que viaje seguro por internet
+            texto_limpio = texto_usuario.strip()
+            texto_codificado = urllib.parse.quote(texto_limpio)
+            
+            # 3. Conexión nativa ultra segura (Corregido y sin errores de caracteres)
+            url_api = f"https://googleapis.com{codigo_destino}&dt=t&q={texto_codificado}"
+            req = urllib.request.Request(url_api, headers={'User-Agent': 'Mozilla/5.0'})
+            
+            with urllib.request.urlopen(req) as respuesta:
+                datos = json.loads(respuesta.read().decode())
+                # 4. Extraemos el texto traducido exactamente de la respuesta
+                resultado_final = datos[0][0][0]
+                
+                # 5. Mostramos el resultado visual bonito en pantalla
+                st.success("¡Traducción exitosa!")
+                st.info(resultado_final)
+                
+        except Exception as e:
+            st.error("El servidor está procesando muchas peticiones. Por favor, apacha el botón 'Traducir Ahora ✨' nuevamente.")
     else:
         st.warning("Por favor, escribe una frase primero.")
-
 
