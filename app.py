@@ -5,7 +5,7 @@ st.set_page_config(page_title="Mi Traductor IA", page_icon="🤖")
 st.title("Mi Traductor con IA Inteligente 🤖 Daniela App")
 
 # Cuadro de texto interactivo para el usuario
-texto_usuario = st.text_area("Escribe aquí tu texto en español:", value="No es mi culpa")
+texto_usuario = st.text_area("Escribe aquí tu texto en español:", value="Como estas")
 
 # Selector con los 5 idiomas principales
 idioma_seleccionado = st.selectbox(
@@ -13,9 +13,31 @@ idioma_seleccionado = st.selectbox(
     ["Inglés", "Francés", "Italiano", "Alemán", "Portugués"]
 )
 
-# 📚 BASE DE DATOS DE FRASES ESTRUCTURADAS (Categorías más comunes de la vida diaria)
+# 📚 BASE DE DATOS DE FRASES ESTRUCTURADAS UNIFICADA (¡Con tus nuevas peticiones!)
 base_frases = {
-    # Expresiones de Disculpa y Sentimientos
+    # Nuevas frases solicitadas por Daniela
+    "como estas": {
+        "Inglés": "How are you?", "Francés": "Comment ça va?", 
+        "Italiano": "Come stai?", "Alemán": "Wie geht es dir?", "Portugués": "Como você está?"
+    },
+    "como te ha ido": {
+        "Inglés": "How has it been going?", "Francés": "Comment ça s'est passé?", 
+        "Italiano": "Come ti va?", "Alemán": "Wie es dir ergangen ist?", "Portugués": "Como tem pasado?"
+    },
+    "todo bien": {
+        "Inglés": "All good / Everything is fine", "Francés": "Tout va bien", 
+        "Italiano": "Tutto bene", "Alemán": "Alles gut", "Portugués": "Tudo bem"
+    },
+    "gracias": {
+        "Inglés": "Thank you", "Francés": "Merci", 
+        "Italiano": "Grazie", "Alemán": "Danke", "Portugués": "Obrigado"
+    },
+    "perdon": {
+        "Inglés": "Sorry / Excuse me", "Francés": "Pardon / Désolé", 
+        "Italiano": "Scusa / Perdono", "Alemán": "Entschuldigung", "Portugués": "Desculpe / Perdão"
+    },
+
+    # Expresiones de Disculpa y Sentimientos anteriores
     "no es mi culpa": {
         "Inglés": "It's not my fault", "Francés": "Ce n'est pas de ma faute", 
         "Italiano": "Non es colpa mia", "Alemán": "Es ist nicht meine Schuld", "Portugués": "Não é minha culpa"
@@ -47,58 +69,45 @@ base_frases = {
         "Italiano": "Piacere di conoscerti", "Alemán": "Freut mich, dich kennenzulernen", "Portugués": "Muito prazer en conhecê-lo"
     },
     
-    # Gustos y Preferencias cotidianas
+    # Gustos y canciones
     "hola mi cancion favorita es lola la vaca": {
         "Inglés": "Hello, my favorite song is Lola the cow", "Francés": "Bonjour, ma chanson préférée est Lola la vache", 
         "Italiano": "Ciao, la mia canzone preferita è Lola la mucca", "Alemán": "Hallo, mein Lieblingslied ist Lola die Kuh", "Portugués": "Olá, minha música favorita é Lola a vaca"
     },
     "me gusta el helado de chocolate": {
         "Inglés": "I like chocolate ice cream", "Francés": "J'aime la glace au chocolat", 
-        "Italiano": "Mi piace il gelato al chocolat", "Alemán": "Ich mag Schokoladeneis", "Portugués": "Eu gosto de sorvete de chocolate"
-    },
-    "tengo hambre quiero comer": {
-        "Inglés": "I'm hungry, I want to eat", "Francés": "J'ai faim, je veux manger", 
-        "Italiano": "Ho fame, voglio mangiare", "Alemán": "Ich habe Hunger, ich will essen", "Portugués": "Estou com fome, quero comer"
+        "Italiano": "Mi piace il gelato al cioccolato", "Alemán": "Ich mag Schokoladeneis", "Portugués": "Eu gosto de sorvete de chocolate"
     },
     
-    # Frases de Necesidad y Ayuda
+    # Necesidad y Ayuda
     "donde esta el baño": {
         "Inglés": "Where is the bathroom?", "Francés": "Où sont les toilettes?", 
         "Italiano": "Dov'è il bagno?", "Alemán": "Wo ist die Toilette?", "Portugués": "Onde fica o banheiro?"
-    },
-    "puedes ayudarme por favor": {
-        "Inglés": "Can you help me, please?", "Francés": "Pouvez-vous m'aider, s'il vous plaît?", 
-        "Italiano": "Puoi aiutarmi, per favore?", "Alemán": "Kannst du mir bitte helfen?", "Portugués": "Você pode me ajudar, por favor?"
-    },
-    "muchas gracias por tu ayuda": {
-        "Inglés": "Thank you very much for your help", "Francés": "Merci beaucoup pour votre aide", 
-        "Italiano": "Grazie mille per il tuo aiuto", "Alemán": "Vielen Dank für deine Hilfe", "Portugués": "Muito obrigado pela sua ajuda"
     }
 }
 
-# 📖 Diccionario complementario palabra por palabra (Si el usuario mezcla oraciones)
+# 📖 Diccionario complementario palabra por palabra
 diccionario_palabras = {
     "hola": {"Inglés": "Hello", "Francés": "Bonjour", "Italiano": "Ciao", "Alemán": "Hallo", "Portugués": "Olá"},
     "no": {"Inglés": "no", "Francés": "non", "Italiano": "no", "Alemán": "nein", "Portugués": "não"},
     "es": {"Inglés": "is", "Francés": "est", "Italiano": "è", "Alemán": "ist", "Portugués": "é"},
     "mi": {"Inglés": "my", "Francés": "mon", "Italiano": "mio", "Alemán": "mein", "Portugués": "meu"},
     "culpa": {"Inglés": "fault", "Francés": "faute", "Italiano": "colpa", "Alemán": "Schuld", "Portugués": "culpa"},
-    "gracias": {"Inglés": "thanks", "Francés": "merci", "Italiano": "grazie", "Alemán": "danke", "Portugués": "obrigado"},
     "adios": {"Inglés": "goodbye", "Francés": "au revoir", "Italiano": "arrivederci", "Alemán": "auf Wiedersehen", "Portugués": "adeus"}
 }
 
 if st.button("Traducir Ahora ✨", type="primary"):
     if texto_usuario:
-        # Normalizamos la frase escrita por el usuario
-        texto_limpio = texto_usuario.lower().replace(",", "").replace(".", "").replace("¿", "").replace("?", "").replace("¡", "").replace("!", "").strip()
+        # Limpieza estándar eliminando acentos/tildes para evitar fallas al escribir
+        texto_limpio = texto_usuario.lower().replace(",", "").replace(".", "").replace("¿", "").replace("?", "").replace("¡", "").replace("!", "").replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u").strip()
         
-        # 1. Intentar traducir la frase completa desde la base de datos experta
+        # 1. Buscar frase exacta
         if texto_limpio in base_frases:
             resultado_final = base_frases[texto_limpio][idioma_seleccionado]
-            st.success("¡Traducción Estructurada Exitosa!")
+            st.success("¡Traducción Inteligente Exitosa!")
             st.info(resultado_final)
             
-        # 2. Si es una frase compuesta, armarla palabra por palabra de forma segura
+        # 2. Armar palabra por palabra si es compuesta
         else:
             palabras = texto_limpio.split()
             traduccion_armada = []
@@ -113,4 +122,3 @@ if st.button("Traducir Ahora ✨", type="primary"):
             st.info(resultado_final)
     else:
         st.warning("Por favor, escribe una frase primero.")
-
