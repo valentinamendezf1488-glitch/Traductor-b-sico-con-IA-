@@ -1,5 +1,4 @@
-
-import streamlit st
+import streamlit as st
 
 # Configuración visual de la App
 st.set_page_config(page_title="Mi Traductor IA", page_icon="🤖")
@@ -22,7 +21,7 @@ traducciones = {
         "Italiano": "Ciao, mi chiamo Daniela",
         "Alemán": "Hallo, mein Name ist Daniela",
         "Portugués": "Olá, meu nome é Daniela",
-        "Japonés": "こんにちは、私の名前 es ダニエラ (Konnichiwa, watashi no namae wa Daniela)"
+        "Japonés": "こんにちは、私の名前はダニエラです (Konnichiwa, watashi no namae wa Daniela desu)"
     },
     "Hola mi nombre es Cristian": {
         "Inglés": "Hello, my name is Cristian",
@@ -30,11 +29,11 @@ traducciones = {
         "Italiano": "Ciao, mi chiamo Cristian",
         "Alemán": "Hallo, mein Name ist Cristian",
         "Portugués": "Olá, meu nome é Cristian",
-        "Japonés": "こんにちは、私の名前 es クリスティアン (Konnichiwa, watashi no namae wa Cristian)"
+        "Japonés": "こんにちは、私の名前はクリスティアンです (Konnichiwa, watashi no namae wa Cristian desu)"
     },
     "Hola mi cancion favorita es lola la vaca": {
         "Inglés": "Hello, my favorite song is Lola the cow",
-        "Francés": "Bonjour, ma chanson préférée es Lola la vache",
+        "Francés": "Bonjour, ma chanson préférée est Lola la vache",
         "Italiano": "Ciao, la mia canzone preferita è Lola la mucca",
         "Alemán": "Hallo, mein Lieblingslied ist Lola die Kuh",
         "Portugués": "Olá, minha música favorita é Lola a vaca",
@@ -66,3 +65,5 @@ if st.button("Traducir Ahora ✨", type="primary"):
             st.info(resultado)
     else:
         st.warning("Por favor, escribe una frase primero.")
+
+
