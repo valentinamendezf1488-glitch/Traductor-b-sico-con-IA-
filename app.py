@@ -1,102 +1,60 @@
 import streamlit as st
+from google import genai
 
-# Configuración visual de tu aplicación web
-st.set_page_config(page_title="Mi Traductor IA", page_icon="🤖")
-st.title("Mi Traductor con IA Inteligente 🤖 Daniela App")
+# Reemplaza con tu clave de API de Google AI Studio
+API_KEY = "TU_API_KEY_AQUI"
+client = genai.Client(api_key=API_KEY)
 
-# Cuadro de texto interactivo para el usuario
-texto_usuario = st.text_area("Escribe aquí tu texto en español:", value="quiero sopa")
+# Configuración de la interfaz web
+st.set_page_config(page_title="Traductor IA Multilingüe con Kaqchikel", page_icon="🌐")
+st.title("🌐 Traductor Inteligente con Kaqchikel Avanzado")
 
-# Selector con los 5 idiomas principales
-idioma_seleccionado = st.selectbox(
-    "Selecciona el idioma al que deseas traducir:",
-    ["Inglés", "Francés", "Italiano", "Alemán", "Portugués"]
-)
+# Lista completa de idiomas
+idiomas = [
+    "Español", "Inglés", "Kaqchikel", "Francés", "Alemán", 
+    "Italiano", "Japonés", "Portugués", "Chino Mandarín", "Ruso"
+]
 
-# 📚 SÚPER DICCIONARIO LOCAL EXTENDIDO (Palabras, alimentos, verbos y conectores más usados)
-diccionario = {
-    # Verbos comunes en primera persona (yo quiero, tengo, necesito, me gusta, etc.)
-    "quiero": {"Inglés": "I want", "Francés": "je veux", "Italiano": "voglio", "Alemán": "ich will", "Portugués": "quero"},
-    "tengo": {"Inglés": "I have", "Francés": "j'ai", "Italiano": "ho", "Alemán": "ich habe", "Portugués": "tenho"},
-    "necesito": {"Inglés": "I need", "Francés": "j'ai besoin de", "Italiano": "ho bisogno di", "Alemán": "ich brauche", "Portugués": "preciso de"},
-    "me": {"Inglés": "I", "Francés": "je", "Italiano": "mi", "Alemán": "ich", "Portugués": "eu"},
-    "gusta": {"Inglés": "like", "Francés": "aime", "Italiano": "piace", "Alemán": "mag", "Portugués": "gosto"},
-    "soy": {"Inglés": "I am", "Francés": "je suis", "Italiano": "sono", "Alemán": "ich bin", "Portugués": "sou"},
-    "estoy": {"Inglés": "I am", "Francés": "je suis", "Italiano": "sto", "Alemán": "ich bin", "Portugués": "estou"},
-    "es": {"Inglés": "is", "Francés": "est", "Italiano": "è", "Alemán": "ist", "Portugués": "é"},
-    "no": {"Inglés": "not", "Francés": "ne pas", "Italiano": "non", "Alemán": "nicht", "Portugués": "não"},
+col1, col2 = st.columns(2)
+with col1:
+    idioma_origen = st.selectbox("Idioma de origen:", idiomas, index=0)
+with col2:
+    idioma_destino = st.selectbox("Idioma a traducir:", idiomas, index=1)
 
-    # Alimentos, bebidas y cosas cotidianas (¡Aquí está sopa, helado, chocolate y más!)
-    "sopa": {"Inglés": "soup", "Francés": "soupe", "Italiano": "zuppa", "Alemán": "Suppe", "Portugués": "sopa"},
-    "helado": {"Inglés": "ice cream", "Francés": "glace", "Italiano": "gelato", "Alemán": "Eis", "Portugués": "sorvete"},
-    "chocolate": {"Inglés": "chocolate", "Francés": "chocolat", "Italiano": "cioccolato", "Alemán": "Schokolade", "Portugués": "chocolate"},
-    "agua": {"Inglés": "water", "Francés": "eau", "Italiano": "acqua", "Alemán": "Wasser", "Portugués": "água"},
-    "comida": {"Inglés": "food", "Francés": "nourriture", "Italiano": "cibo", "Alemán": "Essen", "Portugués": "comida"},
-    "pan": {"Inglés": "bread", "Francés": "pain", "Italiano": "pane", "Alemán": "Brot", "Portugués": "pão"},
-    "cafe": {"Inglés": "coffee", "Francés": "café", "Italiano": "caffè", "Alemán": "Kaffee", "Portugués": "café"},
-    "leche": {"Inglés": "milk", "Francés": "lait", "Italiano": "latte", "Alemán": "Milch", "Portugués": "leite"},
+texto_usuario = st.text_area("Escribe el texto aquí para traducir:", height=150)
 
-    # Pronombres, Artículos y Posesivos
-    "mi": {"Inglés": "my", "Francés": "mon", "Italiano": "mio", "Alemán": "mein", "Portugués": "meu"},
-    "tu": {"Inglés": "your", "Francés": "ton", "Italiano": "tuo", "Alemán": "dein", "Portugués": "teu"},
-    "el": {"Inglés": "the", "Francés": "le", "Italiano": "il", "Alemán": "der", "Portugués": "o"},
-    "la": {"Inglés": "the", "Francés": "la", "Italiano": "la", "Alemán": "die", "Portugués": "a"},
-    "un": {"Inglés": "a", "Francés": "un", "Italiano": "un", "Alemán": "ein", "Portugués": "um"},
-    "una": {"Inglés": "a", "Francés": "une", "Italiano": "una", "Alemán": "eine", "Portugués": "uma"},
-
-    # Saludos, Nombres y Expresiones Comunes
-    "hola": {"Inglés": "Hello", "Francés": "Bonjour", "Italiano": "Ciao", "Alemán": "Hallo", "Portugués": "Olá"},
-    "daniela": {"Inglés": "Daniela", "Francés": "Daniela", "Italiano": "Daniela", "Alemán": "Daniela", "Portugués": "Daniela"},
-    "cristian": {"Inglés": "Cristian", "Francés": "Cristian", "Italiano": "Cristian", "Alemán": "Cristian", "Portugués": "Cristian"},
-    "nombre": {"Inglés": "name", "Francés": "nom", "Italiano": "nome", "Alemán": "Name", "Portugués": "nome"},
-    "culpa": {"Inglés": "fault", "Francés": "faute", "Italiano": "colpa", "Alemán": "Schuld", "Portugués": "culpa"},
-    "como": {"Inglés": "how", "Francés": "comment", "Italiano": "come", "Alemán": "wie", "Portugués": "como"},
-    "estas": {"Inglés": "are you", "Francés": "tu vas", "Italiano": "stai", "Alemán": "geht es dir", "Portugués": "está"},
-    "hoy": {"Inglés": "today", "Francés": "aujourd'hui", "Italiano": "oggi", "Alemán": "heute", "Portugués": "hoje"},
-    "gracias": {"Inglés": "thank you", "Francés": "merci", "Italiano": "grazie", "Alemán": "danke", "Portugués": "obrigado"},
-    "perdon": {"Inglés": "sorry", "Francés": "pardon", "Italiano": "scusa", "Alemán": "entschuldigung", "Portugués": "desculpe"},
-    "todo": {"Inglés": "all", "Francés": "tout", "Italiano": "tutto", "Alemán": "alles", "Portugués": "tudo"},
-    "bien": {"Inglés": "good", "Francés": "bien", "Italiano": "bene", "Alemán": "gut", "Portugués": "bem"},
-    
-    # Conectores y Preposiciones
-    "de": {"Inglés": "of", "Francés": "de", "Italiano": "di", "Alemán": "von", "Portugués": "de"},
-    "hambre": {"Inglés": "hungry", "Francés": "faim", "Italiano": "fame", "Alemán": "Hunger", "Portugués": "fome"},
-    "baño": {"Inglés": "bathroom", "Francés": "toilettes", "Italiano": "bagno", "Alemán": "Toilette", "Portugués": "banheiro"},
-    "donde": {"Inglés": "where", "Francés": "où", "Italiano": "dove", "Alemán": "wo", "Portugués": "onde"},
-    "esta": {"Inglés": "is", "Francés": "est", "Italiano": "è", "Alemán": "ist", "Portugués": "está"}
-}
-
-if st.button("Traducir Ahora ✨", type="primary"):
-    if texto_usuario:
-        # Limpieza automática quitando tildes y signos comunes
-        texto_limpio = texto_usuario.lower().replace(",", "").replace(".", "").replace("¿", "").replace("?", "").replace("¡", "").replace("!", "").replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u").strip()
-        palabras = texto_limpio.split()
-        
-        palabras_traducidas = []
-        for p in palabras:
-            if p in diccionario:
-                palabras_traducidas.append(diccionario[p][idioma_seleccionado])
-            else:
-                # Mantiene la palabra en mayúscula si es un nombre desconocido
-                palabras_traducidas.append(p.capitalize())
-        
-        resultado_final = " ".join(palabras_traducidas)
-        
-        # 🤖 IA GRAMATICAL DE SOPORTE (Corrige estructuras para que suene natural en inglés)
-        if idioma_seleccionado == "Inglés":
-            if "i want" in resultado_final.lower() and "soup" in resultado_final.lower():
-                resultado_final = "I want soup"
-            elif "not" in resultado_final.lower() and "is" in resultado_final.lower() and "fault" in resultado_final.lower():
-                resultado_final = "It's not my fault"
-            elif "hello" in resultado_final.lower() and "how" in resultado_final.lower():
-                resultado_final = resultado_final.replace("hello", "Hello").replace("daniela", "Daniela").replace("how are you today", ", how are you today?")
-            else:
-                resultado_final = resultado_final.capitalize()
-        else:
-            resultado_final = resultado_final.capitalize()
-            
-        st.success("¡Traducción exitosa!")
-        st.subheader("Resultado:")
-        st.info(resultado_final)
+if st.button("Traducir", type="primary"):
+    if not texto_usuario.strip():
+        st.warning("Por favor, ingresa un texto para traducir.")
     else:
-        st.warning("Por favor, escribe una frase primero.")
+        # Prompt con un glosario y base de conocimiento masiva incrustada para el Kaqchikel
+        prompt = f"""
+        Eres un lingüista experto y traductor profesional nativo especializado en el idioma maya Kaqchikel (normado estrictamente por la ALMG) y en los demás idiomas del mundo. 
+        Tu objetivo es traducir el texto de manera perfecta, fluida y sin ningún tipo de malentendido, aplicando la gramática, los saltillos (') y las glotalizaciones correctas.
+
+        Usa como base de referencia estricta el siguiente repertorio masivo de vocabulario, raíces y pronombres en Kaqchikel para asegurar coherencia absoluta:
+        - Pronombres / Sujetos: Rin/In (Yo), Rat (Tú), Rja' (Él/Ella), Oj (Nosotros), Ix (Ustedes), Rje' (Ellos/Ellas).
+        - Naturaleza y Entorno: Ab'äj (Piedra), Ch'umil (Estrella), Ik' (Luna), Q'ij (Sol), Ya' (Agua), K'iche' (Bosque/Selva), Juyu' (Cerro/Montaña), Kaqiq' (Viento), Xar (Cielo), Q'aq' (Fuego).
+        - Familia y Sociedad: Ach'alal (Familiares), Achi (Hombre), Ixöq ( Mujer ), Alab'ëts (Joven), Ak'al (Niño/Niña), Mama' (Anciano/Abuelo), Ixnam (Anciana/Abuela), Tijonel (Maestro), Ajkun (Médico tradicional/Curandero).
+        - Anatomía: Jolomaj (Cabeza), Wa'ch (Ostra/Cara), Aq'oman (Medicina), Q'ab'aj (Mano), Xikin (Orejá), B'aqil (Hueso).
+        - Alimentos y Objetos: Wa (Tortilla/Comida), Kape (Café), Ixkun (Olla), Ch'atäl (Mesa), K'olib'äl (Silla), Po't (Huipil), Xüt (Corte).
+        - Verbos comunes y Acciones: Tijon (Estudiar), Tzijon (Hablar), Choman (Pensar), B'iyin (Caminar), Waran (Dormir), Tijin (Comer), Chakun (Trabajar), K'asän (Vivir), Kaminaq (Muerto).
+        - Números base: Jun (1), Ka'i' (2), Oxi' (3), Kaji' (4), Waqi' (6), Wuqu' (7), Waxaqi' (8), B'eleje' (9), Lajuj (10).
+
+        Instrucciones estrictas:
+        1. Traduce fielmente el siguiente texto de {idioma_origen} a {idioma_destino}.
+        2. Respeta rigurosamente los marcadores de posesión y persona en Kaqchikel (prefixación ergativa y absolutiva).
+        3. No inventes palabras; utiliza términos tradicionales y académicos válidos.
+        4. Devuelve ÚNICAMENTE la traducción final limpia, sin notas, explicaciones ni comentarios adicionales.
+
+        Texto a traducir: {texto_usuario}
+        """
+        
+        with st.spinner("Procesando traducción de alta precisión..."):
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            
+        st.subheader("Traducción:")
+        st.success(response.text)
