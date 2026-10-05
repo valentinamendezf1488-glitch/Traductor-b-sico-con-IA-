@@ -7,14 +7,20 @@ st.set_page_config(page_title="Traductor Multilingüe con IA", page_icon="🌍",
 st.title("🌍 Traductor Multilingüe (Español, Inglés, Francés, Coreano, Portugués, Kaqchikel)")
 st.write("Selecciona los idiomas, escribe tu texto y obtén la traducción al instante.")
 
-# Configuración automática de la API Key para evitar errores
-# (Si prefieres dejarla fija aquí entre las comillas, puedes hacerlo)
-API_KEY_FIJA = "PEGA_AQUÍ_TU_CLAVE"  # O déjala vacía si prefieres usar la barra lateral
+# Inicializar estado de la sesión para la clave
+if "api_key" not in st.session_state:
+    st.session_state["api_key"] = ""
 
 with st.sidebar:
     st.header("Configuración")
-    api_key_input = st.text_input("Gemini API Key:", value=API_KEY_FIJA, type="password")
-    st.info("Traductor configurado y listo para usar.")
+    api_key_input = st.text_input(
+        "Gemini API Key:", 
+        value=st.session_state["api_key"], 
+        type="password"
+    )
+    if api_key_input:
+        st.session_state["api_key"] = api_key_input
+    st.info("Pega tu clave de API aquí.")
 
 # Opciones de idiomas
 idiomas = ["Español", "Inglés", "Francés", "Coreano", "Portugués", "Kaqchikel"]
@@ -30,15 +36,16 @@ texto_usuario = st.text_input("Escribe una palabra o frase para traducir:")
 
 # Botón de traducción
 if st.button("Traducir"):
-    clave_a_usar = api_key_input if api_key_input else API_KEY_FIJA
+    clave_activa = st.session_state.get("api_key", "").strip()
     
-    if not clave_a_usar.strip() or clave_a_usar == "PEGA_AQUÍ_TU_CLAVE":
-        st.warning("⚠️ Por favor, ingresa tu clave válida.")
+    if not clave_activa:
+        st.warning("⚠️ Por favor, ingresa tu clave en la barra lateral izquierda.")
     elif not texto_usuario.strip():
         st.warning("⚠️ Por favor, ingresa una palabra o frase para traducir.")
     else:
         try:
-            genai.configure(api_key=clave_a_usar.strip())
+            # Configurar con la clave ingresada
+            genai.configure(api_key=clave_activa)
             model = genai.GenerativeModel('gemini-1.5-flash')
             
             with st.spinner("Traduciendo con IA..."):
