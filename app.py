@@ -1,6 +1,5 @@
 import streamlit as st
-import os
-from google import genai
+import google.generativeai as genai
 
 # Configuración de la interfaz
 st.set_page_config(page_title="Traductor Multilingüe con IA", page_icon="🌍", layout="centered")
@@ -34,9 +33,11 @@ if st.button("Traducir"):
         st.warning("⚠️ Por favor, ingresa una palabra o frase para traducir.")
     else:
         try:
-            # Esto evita restricciones estrictas del cliente y usa la clave tal cual la pegues
-            os.environ["GEMINI_API_KEY"] = api_key_input.strip()
-            client = genai.Client()
+            # Configurar con la contraseña / API Key ingresada
+            genai.configure(api_key=api_key_input.strip())
+            
+            # Usar el modelo compatible
+            model = genai.GenerativeModel('gemini-1.5-flash')
             
             with st.spinner("Traduciendo con IA..."):
                 prompt = (
@@ -45,10 +46,7 @@ if st.button("Traducir"):
                     f"Devuelve únicamente la traducción exacta, sin explicaciones adicionales:\n\n{texto_usuario}"
                 )
                 
-                response = client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=prompt
-                )
+                response = model.generate_content(prompt)
                 
                 st.success("¡Traducción completada!")
                 st.markdown("### Resultado:")
