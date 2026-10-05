@@ -9,7 +9,7 @@ st.write("Selecciona los idiomas, escribe tu texto y obtén la traducción al in
 
 # Configuración automática de la API Key para evitar errores
 # (Si prefieres dejarla fija aquí entre las comillas, puedes hacerlo)
-API_KEY_FIJA = "PEGA_AQUÍ_TU_CLAVE"  # O déjala vacía si prefieres usar la barra lateral
+API_KEY_FIJA = ""  # O déjala vacía si prefieres usar la barra lateral
 
 with st.sidebar:
     st.header("Configuración")
