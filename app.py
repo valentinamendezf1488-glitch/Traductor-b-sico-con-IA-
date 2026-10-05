@@ -1,10 +1,19 @@
 import streamlit as st
+from google import genai
 
 # =====================================================
-# BASE DE DATOS MAESTRA - TRADUCTOR MULTILINGÜE
-# Idiomas: Español, Inglés, Francés, Coreano, Portugués, Kaqchikel
+# CONFIGURACIÓN DE LA IA (GOOGLE-GENAI)
 # =====================================================
+# Nota: Streamlit busca la API Key en st.secrets["GEMINI_API_KEY"]
+# Si prefieres probar localmente con una variable de entorno, asegúrate de configurarla.
+try:
+    client = genai.Client(api_key=st.secrets.get("GEMINI_API_KEY"))
+except Exception:
+    client = None
 
+# =====================================================
+# BASE DE DATOS MAESTRA (Opcional para referencias)
+# =====================================================
 traductor_base_datos = {
     "familia": [
         {"es": "Madre", "en": "Mother", "fr": "Mère", "ko": "어머니 (eomeoni)", "pt": "Mãe", "cak": "Nan"},
@@ -24,14 +33,15 @@ traductor_base_datos = {
         {"es": "Mucho gusto", "en": "Nice to meet you", "fr": "Enchanté(e)", "ko": "만나서 반갑습니다", "pt": "Muito prazer", "cak": "Utzilem ri k'olic"},
         {"es": "Por favor", "en": "Please", "fr": "S'il vous plaît", "ko": "제발", "pt": "Por favor", "cak": "Tab'ij chawe"},
         {"es": "Adiós", "en": "Goodbye", "fr": "Au revoir", "ko": "안녕히 가세요", "pt": "Tchau", "cak": "Utz rub'ey"},
-        # Frases adicionales personalizadas en Kaqchikel:
         {"es": "Buenos días a todos", "en": "Good morning everyone", "fr": "Bonjour tout le monde", "ko": "여러분 안녕하십니까", "pt": "Bom dia a todos", "cak": "Utz laq'ab' chi re konojel"},
         {"es": "¿Cómo te llamas?", "en": "What is your name?", "fr": "Comment tu t'appelles?", "ko": "이름이 뭡니까?", "pt": "Qual é o seu nome?", "cak": "¿La bi'aj awach?"},
         {"es": "Estoy bien", "en": "I am fine", "fr": "Je vais bien", "ko": "저는 잘 지냅니다", "pt": "Eu estou bem", "cak": "Utz in k'olic"}
     ]
 }
 
-# Configuración de la interfaz en Streamlit
+# =====================================================
+# CONFIGURACIÓN DE LA INTERFAZ EN STREAMLIT
+# =====================================================
 st.set_page_config(
     page_title="Traductor Multilingüe con IA",
     page_icon="🌍",
@@ -39,7 +49,7 @@ st.set_page_config(
 )
 
 st.title("🌍 Traductor Multilingüe (Español, Inglés, Francés, Coreano, Portugués, Kaqchikel)")
-st.write("Selecciona los idiomas y escribe o busca una palabra o frase en tu base de datos.")
+st.write("Selecciona los idiomas y escribe el texto que deseas traducir con la IA.")
 
 # Opciones de idiomas
 idiomas = ["Español", "Inglés", "Francés", "Coreano", "Portugués", "Kaqchikel"]
@@ -53,9 +63,31 @@ with col2:
 # Entrada de texto del usuario
 texto_usuario = st.text_input("Escribe una palabra o frase para traducir:")
 
+# Botón de traducción funcional
 if st.button("Traducir"):
-    if texto_usuario.strip() != "":
-        st.success(f"Traduciendo '{texto_usuario}' de {idioma_origen} a {idioma_destino}...")
-        # Aquí se integrará la lógica de búsqueda en el diccionario y google-genai
-    else:
+    if not texto_usuario.strip():
         st.warning("Por favor, ingresa una palabra o frase válida.")
+    elif not client:
+        st.error("No se encontró la API Key de Google GenAI configurada en st.secrets['GEMINI_API_KEY'].")
+    else:
+        with st.spinner("Traduciendo con IA..."):
+            try:
+                # Prompt estructurado para guiar al modelo
+                prompt = (
+                    f"Eres un traductor experto y preciso, especializado también en lenguas mayas como el Kaqchikel. "
+                    f"Traduce el siguiente texto del idioma '{idioma_origen}' al idioma '{idioma_destino}'. "
+                    f"Devuelve únicamente la traducción exacta, sin explicaciones adicionales:\n\n{texto_usuario}"
+                )
+                
+                # Llamada al modelo gemini-2.5-flash (o el estándar recomendado)
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt
+                )
+                
+                st.success("¡Traducción completada!")
+                st.markdown(f"### Resultado:")
+                st.write(response.text)
+                
+            except Exception as e:
+                st.error(f"Ocurrió un error al conectar con la IA: {e}")
