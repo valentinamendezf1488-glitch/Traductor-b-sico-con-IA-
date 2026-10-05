@@ -1,5 +1,5 @@
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 
 # Configuración de la interfaz
 st.set_page_config(page_title="Traductor Multilingüe con IA", page_icon="🌍", layout="centered")
@@ -7,11 +7,14 @@ st.set_page_config(page_title="Traductor Multilingüe con IA", page_icon="🌍",
 st.title("🌍 Traductor Multilingüe (Español, Inglés, Francés, Coreano, Portugués, Kaqchikel)")
 st.write("Selecciona los idiomas, escribe tu texto y obtén la traducción al instante.")
 
-# Pedir la API Key directamente en la barra lateral para ahorrar tiempo
+# Configuración automática de la API Key para evitar errores
+# (Si prefieres dejarla fija aquí entre las comillas, puedes hacerlo)
+API_KEY_FIJA = "PEGA_AQUÍ_TU_CLAVE"  # O déjala vacía si prefieres usar la barra lateral
+
 with st.sidebar:
     st.header("Configuración")
-    api_key_input = st.text_input("Ingresa tu Gemini API Key:", type="password")
-    st.info("Pega aquí tu clave de API de Google GenAI para activar el traductor.")
+    api_key_input = st.text_input("Gemini API Key:", value=API_KEY_FIJA, type="password")
+    st.info("Traductor configurado y listo para usar.")
 
 # Opciones de idiomas
 idiomas = ["Español", "Inglés", "Francés", "Coreano", "Portugués", "Kaqchikel"]
@@ -27,14 +30,16 @@ texto_usuario = st.text_input("Escribe una palabra o frase para traducir:")
 
 # Botón de traducción
 if st.button("Traducir"):
-    if not api_key_input.strip():
-        st.warning("⚠️ Por favor, ingresa tu Gemini API Key en la barra lateral izquierda.")
+    clave_a_usar = api_key_input if api_key_input else API_KEY_FIJA
+    
+    if not clave_a_usar.strip() or clave_a_usar == "PEGA_AQUÍ_TU_CLAVE":
+        st.warning("⚠️ Por favor, ingresa tu clave válida.")
     elif not texto_usuario.strip():
-        st.warning("⚠️️ Por favor, ingresa una palabra o frase para traducir.")
+        st.warning("⚠️ Por favor, ingresa una palabra o frase para traducir.")
     else:
         try:
-            # Inicializar el cliente con la clave ingresada
-            client = genai.Client(api_key=api_key_input)
+            genai.configure(api_key=clave_a_usar.strip())
+            model = genai.GenerativeModel('gemini-1.5-flash')
             
             with st.spinner("Traduciendo con IA..."):
                 prompt = (
@@ -43,14 +48,11 @@ if st.button("Traducir"):
                     f"Devuelve únicamente la traducción exacta, sin explicaciones adicionales:\n\n{texto_usuario}"
                 )
                 
-                response = client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=prompt
-                )
+                response = model.generate_content(prompt)
                 
                 st.success("¡Traducción completada!")
                 st.markdown("### Resultado:")
                 st.write(response.text)
                 
         except Exception as e:
-            st.error(f"Ocurrió un error: {e}")
+            st.error(f"Ocurrió un error al conectar con la API: {e}")
