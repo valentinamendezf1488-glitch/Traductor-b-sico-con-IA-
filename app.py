@@ -7,7 +7,7 @@ st.set_page_config(page_title="Traductor Multilingüe con IA", page_icon="🌍",
 st.title("🌍 Traductor Multilingüe (Español, Inglés, Francés, Coreano, Portugués, Kaqchikel)")
 st.write("Selecciona los idiomas, escribe tu texto y obtén la traducción al instante.")
 
-# Pedir la API Key directamente en la barra lateral para ahorrar tiempo
+# Pedir la API Key directamente en la barra lateral
 with st.sidebar:
     st.header("Configuración")
     api_key_input = st.text_input("Ingresa tu Gemini API Key:", type="password")
@@ -30,10 +30,9 @@ if st.button("Traducir"):
     if not api_key_input.strip():
         st.warning("⚠️ Por favor, ingresa tu Gemini API Key en la barra lateral izquierda.")
     elif not texto_usuario.strip():
-        st.warning("⚠️️ Por favor, ingresa una palabra o frase para traducir.")
+        st.warning("⚠️ Por favor, ingresa una palabra o frase para traducir.")
     else:
         try:
-            # Inicializar el cliente con la clave ingresada
             client = genai.Client(api_key=api_key_input)
             
             with st.spinner("Traduciendo con IA..."):
@@ -43,8 +42,9 @@ if st.button("Traducir"):
                     f"Devuelve únicamente la traducción exacta, sin explicaciones adicionales:\n\n{texto_usuario}"
                 )
                 
+                # Actualizado al modelo correcto que pide Google
                 response = client.models.generate_content(
-                    model='gemini-2.5-flash',
+                    model='gemini-3.8-flash',
                     contents=prompt
                 )
                 
