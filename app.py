@@ -13,7 +13,7 @@ API_KEY_FIJA = ""  # O déjala vacía si prefieres usar la barra lateral
 
 with st.sidebar:
     st.header("Configuración")
-    api_key_input = st.text_input("Gemini API Key:", value=API_KEY_FIJA, type="password")
+    api_key_input = st.text_input("Gemini API Key:", value=API_KEY_FIJA, type="")
     st.info("Traductor configurado y listo para usar.")
 
 # Opciones de idiomas
@@ -32,7 +32,7 @@ texto_usuario = st.text_input("Escribe una palabra o frase para traducir:")
 if st.button("Traducir"):
     clave_a_usar = api_key_input if api_key_input else API_KEY_FIJA
     
-    if not clave_a_usar.strip() or clave_a_usar == "PEGA_AQUÍ_TU_CLAVE":
+    if not clave_a_usar.strip() or clave_a_usar == "":
         st.warning("⚠️ Por favor, ingresa tu clave válida.")
     elif not texto_usuario.strip():
         st.warning("⚠️ Por favor, ingresa una palabra o frase para traducir.")
