@@ -31,7 +31,8 @@ if st.button("Traducir"):
     else:
         try:
             genai.configure(api_key=api_key_activa)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            # Modelo actualizado para máxima compatibilidad
+            model = genai.GenerativeModel('gemini-pro')
             
             with st.spinner("Traduciendo con IA..."):
                 prompt = (
