@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from google import genai
 
 # Configuración de la interfaz
@@ -11,7 +12,7 @@ st.write("Selecciona los idiomas, escribe tu texto y obtén la traducción al in
 with st.sidebar:
     st.header("Configuración")
     api_key_input = st.text_input("Ingresa tu Gemini API Key:", type="password")
-    st.info("Pega aquí tu clave de API de Google GenAI para activar el traductor.")
+    st.info("Pega aquí tu clave de API para activar el traductor.")
 
 # Opciones de idiomas
 idiomas = ["Español", "Inglés", "Francés", "Coreano", "Portugués", "Kaqchikel"]
@@ -33,7 +34,9 @@ if st.button("Traducir"):
         st.warning("⚠️ Por favor, ingresa una palabra o frase para traducir.")
     else:
         try:
-            client = genai.Client(api_key=api_key_input)
+            # Esto evita restricciones estrictas del cliente y usa la clave tal cual la pegues
+            os.environ["GEMINI_API_KEY"] = api_key_input.strip()
+            client = genai.Client()
             
             with st.spinner("Traduciendo con IA..."):
                 prompt = (
@@ -42,9 +45,8 @@ if st.button("Traducir"):
                     f"Devuelve únicamente la traducción exacta, sin explicaciones adicionales:\n\n{texto_usuario}"
                 )
                 
-                # Actualizado al modelo correcto que pide Google
                 response = client.models.generate_content(
-                    model='gemini-3.8-flash',
+                    model='gemini-2.5-flash',
                     contents=prompt
                 )
                 
@@ -53,4 +55,4 @@ if st.button("Traducir"):
                 st.write(response.text)
                 
         except Exception as e:
-            st.error(f"Ocurrió un error: {e}")
+            st.error(f"Ocurrió un error al conectar con la API: {e}")
